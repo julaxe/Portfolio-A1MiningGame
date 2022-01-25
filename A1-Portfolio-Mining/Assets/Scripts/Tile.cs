@@ -7,9 +7,10 @@ using UnityEngine.UI;
 public class Tile : MonoBehaviour
 {
     // Start is called before the first frame update
-    public List<GameObject> neighbors;
+    private List<GameObject> _neighbors;
 
-    public int tier = 1;
+    [NonSerialized]
+    public int Tier = 5;
     public bool isRevealed;
 
     private readonly string tier1HexColor = "#240E00";
@@ -25,11 +26,12 @@ public class Tile : MonoBehaviour
     void Awake()
     {
         _image = GetComponent<Image>();
+        _neighbors = new List<GameObject>();
     }
 
     private void Start()
     {
-        neighbors = new List<GameObject>();
+        SetTier(Tier);
     }
 
     // Update is called once per frame
@@ -40,12 +42,13 @@ public class Tile : MonoBehaviour
 
     public void AddNeighbor(GameObject tile)
     {
-        neighbors.Add(tile);
+        _neighbors.Add(tile);
     }
 
     public void SetTier(int newTier)
     {
-        switch (newTier)
+        Tier = newTier;
+        switch (Tier)
         {
             case 1:
                 currentHexColor = tier1HexColor;
@@ -65,15 +68,26 @@ public class Tile : MonoBehaviour
             default:
                 return;
         }
-        tier = newTier;
         if (ColorUtility.TryParseHtmlString(currentHexColor, out currentColor))
         {
             _image.color = currentColor;
         }
     }
 
+    private void LowOneTier()
+    {
+        Tier -= 1;
+        if (Tier < 1) Tier = 1;
+        SetTier(Tier);
+    }
+
     public void OnClickEvent()
     {
-        Debug.Log(neighbors);
+        SetTier(1);
+        foreach (var neighbor in _neighbors)
+        {
+            neighbor.GetComponent<Tile>().LowOneTier();
+            Debug.Log(neighbor);
+        }
     }
 }

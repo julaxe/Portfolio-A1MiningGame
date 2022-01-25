@@ -26,6 +26,7 @@ public class Grid : MonoBehaviour
             for (int j = 0; j < size; j++)
             {
                 GameObject newTile = Instantiate(_tilePrefab, transform);
+                newTile.GetComponent<Tile>().Tier = Random.Range(1, 6);
                 TileGrid[i, j] = newTile;
             }
         }

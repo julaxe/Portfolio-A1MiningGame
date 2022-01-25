@@ -145,6 +145,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee202fae5c6e62b47882e6e8ed0770bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  neighbors: []
-  tier: 1
+  tier: 5
   isRevealed: 0
