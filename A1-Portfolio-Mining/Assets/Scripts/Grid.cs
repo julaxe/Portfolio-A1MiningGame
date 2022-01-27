@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class Grid : MonoBehaviour
 {
@@ -26,7 +27,7 @@ public class Grid : MonoBehaviour
             for (int j = 0; j < size; j++)
             {
                 GameObject newTile = Instantiate(_tilePrefab, transform);
-                newTile.GetComponent<Tile>().Tier = Random.Range(1, 6);
+                newTile.GetComponent<Tile>().Tier = GetTier();
                 TileGrid[i, j] = newTile;
             }
         }
@@ -83,10 +84,33 @@ public class Grid : MonoBehaviour
             }
         }
     }
-    
-    // Update is called once per frame
-    void Update()
+
+    int GetTier()
     {
-        
+        //5 -> 5%
+        //4 -> 15%
+        //3 -> 30%
+        //2 -> 30%
+        //1 -> 20%
+        int randomNumber = Random.Range(0, 100);
+        if (randomNumber < 5)
+        {
+            return 5;
+        }
+        if (randomNumber < 20)
+        {
+            return 4;
+        }
+        if (randomNumber < 50)
+        {
+            return 3;
+        }
+        if (randomNumber < 80)
+        {
+            return 2;
+        }
+
+        return 1;
     }
+
 }

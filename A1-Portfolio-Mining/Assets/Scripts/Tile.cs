@@ -9,7 +9,7 @@ public class Tile : MonoBehaviour
     // Start is called before the first frame update
     private List<GameObject> _neighbors;
 
-    [NonSerialized]
+
     public int Tier = 5;
     public bool isRevealed;
 
@@ -22,6 +22,7 @@ public class Tile : MonoBehaviour
     private string currentHexColor;
     private Color currentColor;
 
+    private ResourcesManager _resourcesManager;
     private Image _image;
     void Awake()
     {
@@ -31,7 +32,7 @@ public class Tile : MonoBehaviour
 
     private void Start()
     {
-        SetTier(Tier);
+        _resourcesManager = FindObjectOfType<ResourcesManager>();
     }
 
     // Update is called once per frame
@@ -68,7 +69,7 @@ public class Tile : MonoBehaviour
             default:
                 return;
         }
-        if (ColorUtility.TryParseHtmlString(currentHexColor, out currentColor))
+        if (ColorUtility.TryParseHtmlString(currentHexColor, out currentColor) && isRevealed)
         {
             _image.color = currentColor;
         }
@@ -81,13 +82,62 @@ public class Tile : MonoBehaviour
         SetTier(Tier);
     }
 
+    public void Reveal()
+    {
+        isRevealed = true;
+        SetTier(Tier); // show the true colors
+    }
+
     public void OnClickEvent()
     {
-        SetTier(1);
-        foreach (var neighbor in _neighbors)
+        if (!Tool.IsScanning) //excavating
         {
-            neighbor.GetComponent<Tile>().LowOneTier();
-            Debug.Log(neighbor);
+            if (!isRevealed) return;
+            if(Tool.CurrentExcavating >= Tool.MaxExcavatingAmount) return;
+            
+            //excavate the on-clicked tile
+            _resourcesManager.NewResourceAdded(Tier);
+            SetTier(1);
+            
+            List<GameObject> changedTiles = new List<GameObject>(); //record of the tiles that we change so we don't repeat.
+            foreach (var neighbor in _neighbors)
+            {
+                //check if the neighbor is in the changedTiles list -> if not -> add.
+                if(!changedTiles.Exists(x => x == neighbor))
+                {
+                    changedTiles.Add(neighbor);
+                }
+
+                //outer circle
+                foreach (var neighbor2 in neighbor.GetComponent<Tile>()._neighbors)
+                {
+                    if(!changedTiles.Exists(x => x == neighbor2))
+                    {
+                        changedTiles.Add(neighbor2);
+                    }
+                }
+
+            }
+            //Low the tier of each tile in the list
+            foreach (var tiles in changedTiles)
+            {
+                tiles.GetComponent<Tile>().LowOneTier();
+            }
+
+            Tool.CurrentExcavating++;
+        }
+        else //scanning
+        {
+            if (isRevealed) return;
+            if(Tool.CurrentScanning >= Tool.MaxScanningAmount) return;
+            Reveal();
+            foreach (var neighbor in _neighbors)
+            {
+                neighbor.GetComponent<Tile>().Reveal();
+            }
+
+            Tool.CurrentScanning++;
         }
     }
+    
 }
