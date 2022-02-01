@@ -18,9 +18,7 @@ public class Grid : MonoBehaviour
 
     [Header("Probabilities")] 
     public int tier5 = 5;
-    public int tier4 = 15;
-    public int tier3 = 30;
-    public int tier2 = 30;
+   
     // Start is called before the first frame update
     void Start()
     {
@@ -100,30 +98,41 @@ public class Grid : MonoBehaviour
 
     int GetTier()
     {
-        //5 -> 5%
-        //4 -> 15%
-        //3 -> 30%
-        //2 -> 30%
-        //1 -> 20%
+        //tier 5 is the change of having yellow tiles.
         int randomNumber = Random.Range(0, 100);
         if (randomNumber < tier5)
         {
             return 5;
         }
-        if (randomNumber < (tier5 + tier4))
-        {
-            return 4;
-        }
-        if (randomNumber < (tier5 + tier4 + tier3))
-        {
-            return 3;
-        }
-        if (randomNumber < (tier5 + tier4 + tier3 + tier2))
-        {
-            return 2;
-        }
 
         return 1;
+    }
+
+    void SetupYellowTierTile()
+    {
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                if (TileGrid[i, j].GetComponent<Tile>().Tier == 5)
+                {
+                    SetupTierNeighbors(4, TileGrid[i, j]);
+                }
+            }
+        }
+        
+    }
+    void SetupTierNeighbors(int currentTier, GameObject tile)
+    {
+        if (currentTier <= 1) return;
+        foreach (var neighbor in tile.GetComponent<Tile>().GetNeighbors())
+        {
+            if (neighbor.GetComponent<Tile>().Tier < currentTier) //just change if the value is gonna increase.
+            {
+                neighbor.GetComponent<Tile>().Tier = currentTier;
+                SetupTierNeighbors(currentTier - 1, neighbor); // keep doing it till the currentTier is <= 1.
+            }
+        }
     }
 
     public IEnumerator SetupGrid()
@@ -137,7 +146,7 @@ public class Grid : MonoBehaviour
         
         CreateGrid();
         SetupNeighbors();
-
+        SetupYellowTierTile();
     }
 
 }

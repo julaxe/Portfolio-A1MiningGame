@@ -46,6 +46,11 @@ public class Tile : MonoBehaviour
         _neighbors.Add(tile);
     }
 
+    public List<GameObject> GetNeighbors()
+    {
+        return _neighbors;
+    }
+
     public void SetTier(int newTier)
     {
         Tier = newTier;
